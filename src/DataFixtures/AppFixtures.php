@@ -40,7 +40,7 @@ class AppFixtures extends Fixture
 
         UserFactory::new()
             ->withAttributes([
-                'email' => 'tisha@symfonycasts.com',
+                'email' => 'C',
                 'plainPassword' => 'tishapass',
                 'firstName' => 'Tisha',
                 'lastName' => 'The Cat',
