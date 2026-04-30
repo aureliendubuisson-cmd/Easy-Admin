@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Question;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -50,7 +51,18 @@ class QuestionCrudController extends AbstractCrudController
          ->hideOnIndex();
      yield Field::new('votes', 'Total votes')
          ->setTextAlign('right');
-     yield AssociationField::new('askedBy');
+     yield AssociationField::new('askedBy')
+         ->autocomplete()
+         ->formatValue(static function ($value, Question $question) {
+             if (!$user = $question->getAskedBy()) {
+                 return null;
+             }
+             return sprintf('%s&nbsp;(%s)', $user->getEmail(), $user->getQuestions()->count());
+     })
+     ->setQueryBuilder(function (QueryBuilder $queryBuilder) {
+         $queryBuilder->andWhere('entity.enabled = :enabled')
+             ->setParameter('enabled', true);
+     });
      yield Field::new('createdAt')
          ->hideOnForm();
     }
