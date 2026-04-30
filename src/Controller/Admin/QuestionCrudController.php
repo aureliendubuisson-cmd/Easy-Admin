@@ -9,7 +9,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -38,13 +42,17 @@ class QuestionCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        return [
-            TextField::new('name', 'Nom')
-            ->formatValue(fn ($value): ?string => 'Titre: '.$value),
-            TextField::new('question')
-            ->hideOnDetail(),
-            NumberField::new('votes')
-        ];
+     yield IdField::new('id')
+         ->onlyOnIndex();
+     yield Field::new('name');
+     yield AssociationField::new('topic');
+     yield TextareaField::new('question')
+         ->hideOnIndex();
+     yield Field::new('votes', 'Total votes')
+         ->setTextAlign('right');
+     yield AssociationField::new('askedBy');
+     yield Field::new('createdAt')
+         ->hideOnForm();
     }
     public function upVote(AdminContext $context, EntityManagerInterface $em, AdminUrlGenerator $adminUrlGenerator): Response
     {
@@ -57,7 +65,7 @@ class QuestionCrudController extends AbstractCrudController
                 ->setController(QuestionCrudController::class)
                 ->setAction(Action::DETAIL)
                 ->setEntityId($question->getId())
-            ->generateUrl()
+                ->generateUrl()
         );
     }
 
